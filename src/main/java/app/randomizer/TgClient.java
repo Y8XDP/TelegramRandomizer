@@ -36,8 +36,7 @@ public class TgClient {
             authorized = false;
 
             try{
-                System.out.println(authorizationState.getClass().getName());
-
+                //System.out.println(authorizationState.getClass().getName());
                 if (authorizationState instanceof TdApi.AuthorizationStateReady) {
                     RandomizerBot.send(user.chatId, "Авторизация пройдена");
                     Randomize();

@@ -5,6 +5,7 @@ import app.db.repositories.BotUserRepository;
 import app.randomizer.RandomizeThread;
 import it.tdlight.common.Init;
 import it.tdlight.common.utils.CantLoadLibrary;
+
 public class Main {
 
     private static final BotUserRepository botUserRepository = new BotUserRepository();
