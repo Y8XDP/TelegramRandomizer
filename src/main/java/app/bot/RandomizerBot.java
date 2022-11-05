@@ -1,10 +1,12 @@
 package app.bot;
 
+import app.PropertiesHelper;
 import app.db.model.botUser.BotUser;
 import app.db.repositories.BotUserRepository;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.request.DeleteMessage;
 import com.pengrad.telegrambot.request.GetUpdates;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.request.SendPhoto;
@@ -13,7 +15,9 @@ public class RandomizerBot {
 
     private final BotUserRepository botUserRepository;
 
-    private static final TelegramBot bot = new TelegramBot("5651794984:AAE_4Sygu9sNqedTt2s1oSYXm1JEcDw1ULM");
+    private static final TelegramBot bot = new TelegramBot(
+            PropertiesHelper.getProperties().getProperty(PropertiesHelper.botTokenProp)
+    );
 
     private final UserListener userListener;
 
@@ -51,6 +55,8 @@ public class RandomizerBot {
                     }
 
                     case PASSWORD -> {
+                        DeleteMessage deleteMessage = new DeleteMessage(botUser.chatId, update.message().messageId());
+                        bot.execute(deleteMessage);
                         userListener.password(botUser, update.message().text());
                     }
                 }

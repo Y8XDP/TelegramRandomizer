@@ -2,7 +2,6 @@ package app.jsons;
 
 import app.Main;
 import app.jsons.families.Family;
-import app.jsons.names.Name;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

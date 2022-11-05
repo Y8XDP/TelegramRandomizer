@@ -1,5 +1,6 @@
 package app.randomizer;
 
+import app.PropertiesHelper;
 import app.bot.RandomizerBot;
 import app.db.model.botUser.BotUser;
 import app.db.model.botUser.BotUserStatus;
@@ -20,23 +21,28 @@ public class TgClient {
     public TgClient(BotUser user) {
         this.botUser = user;
 
-        //var apiToken = new APIToken(1, "dsvfg3fwvv45vt234x134asdf43rbb556234");
-        var apiToken = APIToken.example();
+        var apiToken = new APIToken(
+                Integer.parseInt(PropertiesHelper.getProperties().getProperty(PropertiesHelper.apiIdProp)),
+                PropertiesHelper.getProperties().getProperty(PropertiesHelper.apiHashProp)
+        );
+
         var settings = TDLibSettings.create(apiToken);
 
-        var sessionPath = Paths.get(user.sessionDataPath);
+        var sessionPath = Paths.get("userSessions/" + user.sessionDataPath);
         settings.setDatabaseDirectoryPath(sessionPath.resolve("data"));
+        settings.setChatInfoDatabaseEnabled(false);
+        settings.setFileDatabaseEnabled(false);
+        settings.setMessageDatabaseEnabled(false);
 
         client = new SimpleTelegramClient(settings);
 
-        var authenticationData = AuthenticationData.qrCode();
+        var authenticationData = new ClientAuthData();
 
         client.addUpdateHandler(TdApi.UpdateAuthorizationState.class, update -> {
             var authorizationState = update.authorizationState;
             authorized = false;
 
             try{
-                //System.out.println(authorizationState.getClass().getName());
                 if (authorizationState instanceof TdApi.AuthorizationStateReady) {
                     RandomizerBot.send(user.chatId, "Авторизация пройдена");
                     Randomize();
@@ -51,7 +57,7 @@ public class TgClient {
                     RandomizerBot.sendCode(user.chatId, QrGenerator.generateQrAsByteArray(codeInfo));
                 } else if (authorizationState instanceof TdApi.AuthorizationStateWaitPassword){
                     botUser.currentStatus = BotUserStatus.PASSWORD;
-                    RandomizerBot.send(user.chatId, "Требуется ввести пароль");
+                    RandomizerBot.send(user.chatId, "Требуется ввести пароль (сообщение с паролем будет сразу удалено)");
                 }
             }catch (Exception e){
                 e.printStackTrace();
@@ -62,7 +68,14 @@ public class TgClient {
     }
 
     public void confirmPassword(String password) {
-        //client.send(new TdApi.);
+        client.send(new TdApi.CheckAuthenticationPassword(password), result -> {
+            if (!result.isError()){
+                botUser.currentStatus = BotUserStatus.READY;
+                RandomizerBot.send(botUser.chatId, "Авторизация пройдена");
+            }else{
+                RandomizerBot.send(botUser.chatId, "Авторизация не пройдена, требуется ввести пароль");
+            }
+        });
     }
 
     public void Randomize(){

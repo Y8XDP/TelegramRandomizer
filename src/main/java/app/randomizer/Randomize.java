@@ -12,6 +12,7 @@ public class Randomize {
     private static final Random rand = new Random();
 
     private static final Names names = new Names();
+
     private static final Families families = new Families();
 
     public static RandomizedPerson randomizePerson(){
